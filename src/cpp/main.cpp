@@ -27,8 +27,8 @@ float MAX_STRETCH = 1.2f;
 float MIN_STRETCH = 0.1f;
 float MASS = 3.0f;
 float EPS = 1.0f / 10000.0f;
-int HEIGHT = 20;
-int WIDTH = 20;
+int HEIGHT = 40;
+int WIDTH = 40;
 
 std::map<int, Ball*> balls;
 std::vector<Constraint*> constraints;
@@ -44,6 +44,8 @@ std::vector<float> vertices;
 std::vector<unsigned int> indices;
 
 float mouseX = 0.0f, mouseY = 0.0f;
+
+double frame_time = 0.0, last_frame = 0.0, current_time = 0.0;
 
 void init();
 void setup();
@@ -101,9 +103,13 @@ int main() {
         for(auto ball: balls)
             ball.second->update();
 
+        current_time = glfwGetTime();
+        frame_time = current_time - last_frame;
+        last_frame = glfwGetTime();
+        std::cout << "Physics time: " << frame_time * 1000 << std::endl;
+
         //RENDER
 
-        indices.clear();
 
         for(auto force_o : forces) {
             int id1 = force_o->id_ball_1;
@@ -116,21 +122,8 @@ int main() {
             vertices[4 * id1 + 1] = ball1->pos.y;
             vertices[4 * id2] = ball2->pos.x;
             vertices[4 * id2 + 1] = ball2->pos.y;
-//            indices.push_back(id1);
-//            indices.push_back(id2);
         }
 
-        for(int i = 0; i < HEIGHT-1; ++i) {
-            for(int j = 0; j < WIDTH-1; ++j) {
-                indices.push_back(i*WIDTH+j);
-                indices.push_back((i+1)*WIDTH+j);
-                indices.push_back(i*WIDTH+j+1);
-
-                indices.push_back((i+1)*WIDTH+j);
-                indices.push_back((i+1)*WIDTH+j+1);
-                indices.push_back(i*WIDTH+j+1);
-            }
-        }
 
 
         glBindVertexArray(VAO);
@@ -138,8 +131,6 @@ int main() {
         glBindBuffer(GL_ARRAY_BUFFER, VBO);
         glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), &vertices[0], GL_DYNAMIC_DRAW);
 
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), &indices[0], GL_DYNAMIC_DRAW);
 
         glBindVertexArray(0);
 
@@ -151,14 +142,17 @@ int main() {
 
         glm::mat4 ortho = glm::ortho(0.0f, (float)SCR_WIDTH, (float)SCR_HEIGHT, 0.0f, -1.0f, 1.0f);
         shader->setMat4("projection", ortho);
-        shader->setInt("width", WIDTH);
-        shader->setInt("height", HEIGHT);
 
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
+
+        current_time = glfwGetTime();
+        frame_time = current_time - last_frame;
+        last_frame = glfwGetTime();
+        std::cout << "Render time: " << frame_time * 1000 << std::endl;
     }
 
     glfwTerminate();
@@ -199,7 +193,6 @@ void framebufferSizeCallback(GLFWwindow* window, int width, int height) {
 
 void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
     if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
-        std::cout << "down" << std::endl;
         pos_c1 = glm::vec2(mouseX, mouseY);
         pressed = true;
         for(auto ball : balls) {
@@ -210,7 +203,6 @@ void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
             }
         }
     } else if(button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE) {
-        std::cout << "up" << std::endl;
         if(!pressed)
             return;
         pressed = false;
@@ -298,10 +290,22 @@ void setup() {
             balls[ball_id] = new_ball;
             vertices.push_back(new_ball->pos.x);
             vertices.push_back(new_ball->pos.y);
-            vertices.push_back(i);
-            vertices.push_back(j);
+            vertices.push_back(1.0f - (float)j / (float)(HEIGHT-1));
+            vertices.push_back(1.0f - (float)i / (float)(WIDTH-1));
 
             ball_id++;
+        }
+    }
+
+    for(int i = 0; i < HEIGHT-1; ++i) {
+        for(int j = 0; j < WIDTH-1; ++j) {
+            indices.push_back(i*WIDTH+j);
+            indices.push_back((i+1)*WIDTH+j);
+            indices.push_back(i*WIDTH+j+1);
+
+            indices.push_back((i+1)*WIDTH+j);
+            indices.push_back((i+1)*WIDTH+j+1);
+            indices.push_back(i*WIDTH+j+1);
         }
     }
 
