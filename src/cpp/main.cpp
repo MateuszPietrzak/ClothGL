@@ -22,8 +22,8 @@ float MAX_STRETCH = 1.2f;
 float MIN_STRETCH = 0.1f;
 float MASS = 3.0f;
 float EPS = 1.0f / 10000.0f;
-int HEIGHT = 40;
-int WIDTH = 40;
+int HEIGHT = 20;
+int WIDTH = 20;
 
 std::map<int, Ball*> balls;
 std::vector<Constraint*> constraints;
@@ -126,6 +126,8 @@ int main() {
 
         glm::mat4 ortho = glm::ortho(0.0f, (float)SCR_WIDTH, (float)SCR_HEIGHT, 0.0f, -1.0f, 1.0f);
         shader->setMat4("projection", ortho);
+        shader->setInt("width", SCR_WIDTH);
+        shader->setInt("height", SCR_WIDTH);
 
         glBindVertexArray(VAO);
         glDrawElements(GL_LINES, indices.size(), GL_UNSIGNED_INT, 0);
