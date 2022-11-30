@@ -1,5 +1,8 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+
+#define STB_IMAGE_IMPLEMENTATION
+
 #include <iostream>
 #include <vector>
 #include <map>
@@ -7,6 +10,8 @@
 #include "../../include/Ball.h"
 #include "../../include/Constraint.h"
 #include "../../include/Force.h"
+#include "../../include/Texture.h"
+
 
 GLFWwindow *window;
 int SCR_WIDTH = 1200;
@@ -78,6 +83,7 @@ int main() {
 
 
     auto *shader = new Shader("src/glsl/shader.vert", "src/glsl/shader.frag");
+    unsigned int texture = Texture::createTexture("assets/image.png");
 
     while(!glfwWindowShouldClose(window)) {
         processInput(window);
@@ -110,8 +116,20 @@ int main() {
             vertices[4 * id1 + 1] = ball1->pos.y;
             vertices[4 * id2] = ball2->pos.x;
             vertices[4 * id2 + 1] = ball2->pos.y;
-            indices.push_back(id1);
-            indices.push_back(id2);
+//            indices.push_back(id1);
+//            indices.push_back(id2);
+        }
+
+        for(int i = 0; i < HEIGHT-1; ++i) {
+            for(int j = 0; j < WIDTH-1; ++j) {
+                indices.push_back(i*WIDTH+j);
+                indices.push_back((i+1)*WIDTH+j);
+                indices.push_back(i*WIDTH+j+1);
+
+                indices.push_back((i+1)*WIDTH+j);
+                indices.push_back((i+1)*WIDTH+j+1);
+                indices.push_back(i*WIDTH+j+1);
+            }
         }
 
 
@@ -127,13 +145,17 @@ int main() {
 
         shader->use();
 
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, texture);
+        shader->setInt("tex", 0);
+
         glm::mat4 ortho = glm::ortho(0.0f, (float)SCR_WIDTH, (float)SCR_HEIGHT, 0.0f, -1.0f, 1.0f);
         shader->setMat4("projection", ortho);
         shader->setInt("width", WIDTH);
         shader->setInt("height", HEIGHT);
 
         glBindVertexArray(VAO);
-        glDrawElements(GL_LINES, indices.size(), GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
 
         glfwSwapBuffers(window);
         glfwPollEvents();

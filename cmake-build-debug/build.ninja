@@ -91,6 +91,13 @@ build CMakeFiles/ClothGL.dir/src/cpp/Force.cpp.o: CXX_COMPILER__ClothGL_Debug /h
   OBJECT_DIR = CMakeFiles/ClothGL.dir
   OBJECT_FILE_DIR = CMakeFiles/ClothGL.dir/src/cpp
 
+build CMakeFiles/ClothGL.dir/src/cpp/Texture.cpp.o: CXX_COMPILER__ClothGL_Debug /home/mateuszp/Documents/cpp/CLionProjects/OpenGL/ClothGL/src/cpp/Texture.cpp || cmake_object_order_depends_target_ClothGL
+  DEP_FILE = CMakeFiles/ClothGL.dir/src/cpp/Texture.cpp.o.d
+  FLAGS = -g -fdiagnostics-color=always -std=gnu++17
+  INCLUDES = -I/home/mateuszp/Documents/cpp/CLionProjects/OpenGL/ClothGL/glad -I/home/mateuszp/Documents/cpp/CLionProjects/OpenGL/ClothGL/KHR
+  OBJECT_DIR = CMakeFiles/ClothGL.dir
+  OBJECT_FILE_DIR = CMakeFiles/ClothGL.dir/src/cpp
+
 
 # =============================================================================
 # Link build statements for EXECUTABLE target ClothGL
@@ -99,7 +106,7 @@ build CMakeFiles/ClothGL.dir/src/cpp/Force.cpp.o: CXX_COMPILER__ClothGL_Debug /h
 #############################################
 # Link the executable ClothGL
 
-build ClothGL: CXX_EXECUTABLE_LINKER__ClothGL_Debug CMakeFiles/ClothGL.dir/src/cpp/main.cpp.o CMakeFiles/ClothGL.dir/src/cpp/glad.c.o CMakeFiles/ClothGL.dir/src/cpp/Shader.cpp.o CMakeFiles/ClothGL.dir/src/cpp/Ball.cpp.o CMakeFiles/ClothGL.dir/src/cpp/Constraint.cpp.o CMakeFiles/ClothGL.dir/src/cpp/Force.cpp.o | /usr/lib/libOpenGL.so /usr/lib/libGLX.so /usr/lib/libGLU.so /usr/lib/libglfw.so.3.3
+build ClothGL: CXX_EXECUTABLE_LINKER__ClothGL_Debug CMakeFiles/ClothGL.dir/src/cpp/main.cpp.o CMakeFiles/ClothGL.dir/src/cpp/glad.c.o CMakeFiles/ClothGL.dir/src/cpp/Shader.cpp.o CMakeFiles/ClothGL.dir/src/cpp/Ball.cpp.o CMakeFiles/ClothGL.dir/src/cpp/Constraint.cpp.o CMakeFiles/ClothGL.dir/src/cpp/Force.cpp.o CMakeFiles/ClothGL.dir/src/cpp/Texture.cpp.o | /usr/lib/libOpenGL.so /usr/lib/libGLX.so /usr/lib/libGLU.so /usr/lib/libglfw.so.3.3
   FLAGS = -g
   LINK_LIBRARIES = /usr/lib/libOpenGL.so  /usr/lib/libGLX.so  /usr/lib/libGLU.so  /usr/lib/libglfw.so.3.3
   OBJECT_DIR = CMakeFiles/ClothGL.dir
