@@ -68,8 +68,11 @@ int main() {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), &indices[0], GL_DYNAMIC_DRAW);
 
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
+
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+    glEnableVertexAttribArray(1);
 
     glBindVertexArray(0);
 
@@ -103,10 +106,10 @@ int main() {
 
             auto ball1 = balls[id1];
             auto ball2 = balls[id2];
-            vertices[2 * id1] = ball1->pos.x;
-            vertices[2 * id1 + 1] = ball1->pos.y;
-            vertices[2 * id2] = ball2->pos.x;
-            vertices[2 * id2 + 1] = ball2->pos.y;
+            vertices[4 * id1] = ball1->pos.x;
+            vertices[4 * id1 + 1] = ball1->pos.y;
+            vertices[4 * id2] = ball2->pos.x;
+            vertices[4 * id2 + 1] = ball2->pos.y;
             indices.push_back(id1);
             indices.push_back(id2);
         }
@@ -126,8 +129,8 @@ int main() {
 
         glm::mat4 ortho = glm::ortho(0.0f, (float)SCR_WIDTH, (float)SCR_HEIGHT, 0.0f, -1.0f, 1.0f);
         shader->setMat4("projection", ortho);
-        shader->setInt("width", SCR_WIDTH);
-        shader->setInt("height", SCR_WIDTH);
+        shader->setInt("width", WIDTH);
+        shader->setInt("height", HEIGHT);
 
         glBindVertexArray(VAO);
         glDrawElements(GL_LINES, indices.size(), GL_UNSIGNED_INT, 0);
@@ -267,12 +270,14 @@ void setup() {
                 constraints.push_back(con);
             }
 
-            if(i == 0 && (j == 0 || j == WIDTH-1))
+            if((i == 0  /*|| i == HEIGHT-1*/) && (j == 0 || j == WIDTH-1))
 				new_ball->fixed = true;
 
             balls[ball_id] = new_ball;
             vertices.push_back(new_ball->pos.x);
             vertices.push_back(new_ball->pos.y);
+            vertices.push_back(i);
+            vertices.push_back(j);
 
             ball_id++;
         }
