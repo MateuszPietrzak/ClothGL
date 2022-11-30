@@ -38,11 +38,15 @@ Ball *pressed_ball;
 std::vector<float> vertices;
 std::vector<unsigned int> indices;
 
+float mouseX = 0.0f, mouseY = 0.0f;
+
 void init();
 void setup();
 void processForces();
 void processJacobian();
 void framebufferSizeCallback(GLFWwindow* window, int width, int height);
+void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
+void cursorPositionCallback(GLFWwindow* window, double xpos, double ypos) ;
 void processInput(GLFWwindow* window);
 
 int main() {
@@ -77,6 +81,9 @@ int main() {
 
         glClearColor(0.20f, 0.19f, 0.18f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
+
+        if(carrying_ball)
+            pressed_ball->pos = glm::vec2(mouseX, mouseY);
 
         processForces();
         for(int jk = 0; jk < JACOBIAN_COEF; ++jk)
@@ -153,12 +160,45 @@ void init() {
 
     glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
     glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
+    glfwSetMouseButtonCallback(window, mouseButtonCallback);
+    glfwSetCursorPosCallback(window, cursorPositionCallback);
 }
 
 void framebufferSizeCallback(GLFWwindow* window, int width, int height) {
     glViewport(0, 0, width, height);
     SCR_WIDTH = width;
     SCR_HEIGHT = height;
+}
+
+void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
+    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
+        std::cout << "down" << std::endl;
+        pos_c1 = glm::vec2(mouseX, mouseY);
+        pressed = true;
+        for(auto ball : balls) {
+            if(glm::distance(ball.second->pos, pos_c1) < ball.second->size / 2.0f) {
+                ball.second->temp_fixed = true;
+                pressed_ball = ball.second;
+                carrying_ball = true;
+            }
+        }
+    } else if(button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE) {
+        std::cout << "up" << std::endl;
+        if(!pressed)
+            return;
+        pressed = false;
+        if(carrying_ball) {
+            pressed_ball->prev_pos = pressed_ball->pos;
+            pressed_ball->temp_fixed = false;
+            carrying_ball = false;
+        }
+    }
+
+}
+
+void cursorPositionCallback(GLFWwindow* window, double xpos, double ypos) {
+    mouseX = (float)xpos;
+    mouseY = (float)ypos;
 }
 
 void processInput(GLFWwindow* window) {
