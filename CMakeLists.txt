@@ -19,5 +19,4 @@ add_executable(ClothGL src/cpp/main.cpp src/cpp/glad.c src/cpp/Shader.cpp includ
 target_link_libraries (ClothGL
         ${OPENGL_LIBRARIES}
         ${GLFW3_LIBRARY}
-        glfw
-        glm)
+        glfw)
