@@ -30,7 +30,7 @@ float EPS = 1.0f / 10000.0f;
 int HEIGHT = 40;
 int WIDTH = 40;
 
-std::map<int, Ball*> balls;
+std::vector<Ball*> balls;
 std::vector<Constraint*> constraints;
 std::vector<Force*> forces;
 glm::vec2 pos_c1, pos_c2;
@@ -45,7 +45,7 @@ std::vector<unsigned int> indices;
 
 float mouseX = 0.0f, mouseY = 0.0f;
 
-double frame_time = 0.0, last_frame = 0.0, current_time = 0.0;
+double frame_time = 0.0, last_time = 0.0, last_time_sm = 0.0, current_time = 0.0;
 
 void init();
 void setup();
@@ -88,33 +88,65 @@ int main() {
     unsigned int texture = Texture::createTexture("assets/image.png");
 
     while(!glfwWindowShouldClose(window)) {
+        last_time = glfwGetTime();
+        // Something
         processInput(window);
 
         glClearColor(0.20f, 0.19f, 0.18f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
+        // End of something
+        current_time = glfwGetTime();
+        frame_time = current_time - last_time;
+        std::cout << "Something time: " << frame_time * 1000 << "ms" << std::endl;
+        last_time = glfwGetTime();
 
+        // -----------------------------------------------------------------------------------------------------------
+        // Physics
+        last_time_sm = glfwGetTime();
+        // Move held ball
         if(carrying_ball)
             pressed_ball->pos = glm::vec2(mouseX, mouseY);
+        current_time = glfwGetTime();
+        frame_time = current_time - last_time_sm;
+        std::cout << "Move 1 time: " << frame_time * 1000 << "ms" << std::endl;
+        last_time_sm = glfwGetTime();
 
+        // process forces
         processForces();
+        current_time = glfwGetTime();
+        frame_time = current_time - last_time_sm;
+        std::cout << "Process forces time: " << frame_time * 1000 << "ms" << std::endl;
+        last_time_sm = glfwGetTime();
+
+        // process jacobian
         for(int jk = 0; jk < JACOBIAN_COEF; ++jk)
             processJacobian();
-
-        for(auto ball: balls)
-            ball.second->update();
-
         current_time = glfwGetTime();
-        frame_time = current_time - last_frame;
-        last_frame = glfwGetTime();
-        std::cout << "Physics time: " << frame_time * 1000 << std::endl;
+        frame_time = current_time - last_time_sm;
+        std::cout << "Process Jacobian time: " << frame_time * 1000 << "ms" << std::endl;
+        last_time_sm = glfwGetTime();
 
-        //RENDER
+        // update balls
+        for(auto ball: balls)
+            ball->update();
+        current_time = glfwGetTime();
+        frame_time = current_time - last_time_sm;
+        std::cout << "Update balls time: " << frame_time * 1000 << "ms" << std::endl;
+        last_time_sm = glfwGetTime();
 
 
+        // End of physics
+        current_time = glfwGetTime();
+        frame_time = current_time - last_time;
+        std::cout << "Physics time: " << frame_time * 1000 << "ms" << std::endl;
+        last_time = glfwGetTime();
+
+        // -----------------------------------------------------------------------------------------------------------
+        // Render
         for(auto force_o : forces) {
             int id1 = force_o->id_ball_1;
             int id2 = force_o->id_ball_2;
-            if(force_o->type != SPRING) continue;
+            if (force_o->type != SPRING) continue;
 
             auto ball1 = balls[id1];
             auto ball2 = balls[id2];
@@ -123,8 +155,6 @@ int main() {
             vertices[4 * id2] = ball2->pos.x;
             vertices[4 * id2 + 1] = ball2->pos.y;
         }
-
-
 
         glBindVertexArray(VAO);
 
@@ -148,11 +178,11 @@ int main() {
 
         glfwSwapBuffers(window);
         glfwPollEvents();
-
+        // End of render
         current_time = glfwGetTime();
-        frame_time = current_time - last_frame;
-        last_frame = glfwGetTime();
-        std::cout << "Render time: " << frame_time * 1000 << std::endl;
+        frame_time = current_time - last_time;
+        last_time = current_time;
+        std::cout << "Render time: " << frame_time * 1000 << "ms" << std::endl;
     }
 
     glfwTerminate();
@@ -196,9 +226,9 @@ void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
         pos_c1 = glm::vec2(mouseX, mouseY);
         pressed = true;
         for(auto ball : balls) {
-            if(glm::distance(ball.second->pos, pos_c1) < ball.second->size / 2.0f) {
-                ball.second->temp_fixed = true;
-                pressed_ball = ball.second;
+            if(glm::distance(ball->pos, pos_c1) < ball->size / 2.0f) {
+                ball->temp_fixed = true;
+                pressed_ball = ball;
                 carrying_ball = true;
             }
         }
@@ -235,6 +265,8 @@ void setup() {
 	float ver_dist = (SCR_HEIGHT - 2.0 * ver_pad) / (HEIGHT - 1);
 	float hor_dist = (SCR_WIDTH - 2.0 * hor_pad) / (WIDTH - 1);
     auto pos = glm::vec2(0.0f);
+
+    balls.resize(HEIGHT*WIDTH);
 
     for(int i = 0; i < HEIGHT; ++i) {
         for(int j = 0; j < WIDTH; ++j) {
@@ -337,6 +369,9 @@ void processForces() {
 }
 
 void processJacobian() {
+    double time_1 = 0.0, time_2 = 0.0, last_time_ss = 0.0;
+    last_time_ss = glfwGetTime();
+    // all 1.06ms
     for(auto cons : constraints) {
         int id1 = cons->id_ball_1;
         int id2 = cons->id_ball_2;
@@ -347,12 +382,12 @@ void processJacobian() {
         auto pos2 = ball2->pos;
         auto disp = cons->displacement(pos1, pos2);
 
-        switch(cons->type) {
+        switch (cons->type) {
             case CLOSER:
-                if(glm::length(disp) > EPS) {
-                    if(ball1->fixed)
+                if (glm::length(disp) > EPS) {
+                    if (ball1->fixed)
                         ball2->pos -= disp * 2.0f;
-                    else if(ball2->fixed)
+                    else if (ball2->fixed)
                         ball1->pos += disp * 2.0f;
                     else {
                         ball1->pos += disp;
@@ -361,10 +396,10 @@ void processJacobian() {
                 }
                 break;
             case FURTHER:
-                if(glm::length(disp) > EPS) {
-                    if(ball1->fixed)
+                if (glm::length(disp) > EPS) {
+                    if (ball1->fixed)
                         ball2->pos -= disp * 2.0f;
-                    else if(ball2->fixed)
+                    else if (ball2->fixed)
                         ball1->pos += disp * 2.0f;
                     else {
                         ball1->pos += disp;
@@ -376,4 +411,8 @@ void processJacobian() {
                 break;
         }
     }
+    current_time = glfwGetTime();
+    time_2 = current_time - last_time_ss;
+    std::cout << "Time 2: " << time_2 * 1000 << "ms" << std::endl;
+    // std::cout << "Time 1: " << time_1 * 1000 << "ms\nTime 2: " << time_2 * 1000 << "ms" << std::endl;
 }
