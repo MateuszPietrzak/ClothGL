@@ -1,0 +1,25 @@
+
+# Consider dependencies only in project.
+set(CMAKE_DEPENDS_IN_PROJECT_ONLY OFF)
+
+# The set of languages for which implicit dependencies are needed:
+set(CMAKE_DEPENDS_LANGUAGES
+  )
+
+# The set of dependency files which are needed:
+set(CMAKE_DEPENDS_DEPENDENCY_FILES
+  "/home/drabart/CLionProjects/ClothGL/src/cpp/glad.c" "CMakeFiles/ClothGL.dir/src/cpp/glad.c.o" "gcc" "CMakeFiles/ClothGL.dir/src/cpp/glad.c.o.d"
+  "/home/drabart/CLionProjects/ClothGL/src/cpp/Ball.cpp" "CMakeFiles/ClothGL.dir/src/cpp/Ball.cpp.o" "gcc" "CMakeFiles/ClothGL.dir/src/cpp/Ball.cpp.o.d"
+  "/home/drabart/CLionProjects/ClothGL/src/cpp/Constraint.cpp" "CMakeFiles/ClothGL.dir/src/cpp/Constraint.cpp.o" "gcc" "CMakeFiles/ClothGL.dir/src/cpp/Constraint.cpp.o.d"
+  "/home/drabart/CLionProjects/ClothGL/src/cpp/Force.cpp" "CMakeFiles/ClothGL.dir/src/cpp/Force.cpp.o" "gcc" "CMakeFiles/ClothGL.dir/src/cpp/Force.cpp.o.d"
+  "/home/drabart/CLionProjects/ClothGL/src/cpp/Shader.cpp" "CMakeFiles/ClothGL.dir/src/cpp/Shader.cpp.o" "gcc" "CMakeFiles/ClothGL.dir/src/cpp/Shader.cpp.o.d"
+  "/home/drabart/CLionProjects/ClothGL/src/cpp/Texture.cpp" "CMakeFiles/ClothGL.dir/src/cpp/Texture.cpp.o" "gcc" "CMakeFiles/ClothGL.dir/src/cpp/Texture.cpp.o.d"
+  "/home/drabart/CLionProjects/ClothGL/src/cpp/main.cpp" "CMakeFiles/ClothGL.dir/src/cpp/main.cpp.o" "gcc" "CMakeFiles/ClothGL.dir/src/cpp/main.cpp.o.d"
+  )
+
+# Targets to which this target links.
+set(CMAKE_TARGET_LINKED_INFO_FILES
+  )
+
+# Fortran module output directory.
+set(CMAKE_Fortran_TARGET_MODULE_DIR "")
