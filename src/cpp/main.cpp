@@ -412,5 +412,4 @@ void processJacobian() {
     current_time = glfwGetTime();
     time_2 = current_time - last_time_ss;
     std::cout << "Time 2: " << time_2 * 1000 << "ms" << std::endl;
-    // std::cout << "Time 1: " << time_1 * 1000 << "ms\nTime 2: " << time_2 * 1000 << "ms" << std::endl;
 }
