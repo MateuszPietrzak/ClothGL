@@ -19,14 +19,14 @@ int SCR_HEIGHT = 800;
 
 float STEP_SIZE = 1.0f / 100.0f;
 float SIMPLE_GRAVITY_COEF = 500.0f;
-int JACOBIAN_COEF = 10;
+int JACOBIAN_COEF = 8;
 float SPRING_COEF = 1.5f;
 float MAX_STRETCH = 1.2f;
 float MIN_STRETCH = 0.1f;
 float MASS = 3.0f;
 float EPS = 1.0f / 10000.0f;
-int HEIGHT = 40;
-int WIDTH = 40;
+int HEIGHT = 20;
+int WIDTH = 20;
 
 std::vector<Ball*> balls;
 std::vector<Constraint*> constraints;
