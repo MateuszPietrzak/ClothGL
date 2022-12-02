@@ -18,8 +18,6 @@ int SCR_WIDTH = 1200;
 int SCR_HEIGHT = 800;
 
 float STEP_SIZE = 1.0f / 100.0f;
-float VEL_COEF = 1.0f / 1.0f;
-float GRAV_COEF = 100000.0f;
 float SIMPLE_GRAVITY_COEF = 500.0f;
 int JACOBIAN_COEF = 10;
 float SPRING_COEF = 1.5f;
