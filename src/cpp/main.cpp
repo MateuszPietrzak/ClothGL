@@ -25,8 +25,8 @@ float MAX_STRETCH = 1.2f;
 float MIN_STRETCH = 0.1f;
 float MASS = 3.0f;
 float EPS = 1.0f / 10000.0f;
-int HEIGHT = 40;
-int WIDTH = 40;
+int HEIGHT = 60;
+int WIDTH = 60;
 
 std::vector<Ball*> balls;
 std::vector<Constraint*> constraints;
