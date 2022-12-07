@@ -24,6 +24,7 @@ float SPRING_COEF = 1.5f;
 float MAX_STRETCH = 1.2f;
 float MIN_STRETCH = 0.1f;
 float MASS = 3.0f;
+bool ADD_CLOSER = false;
 float EPS = 1.0f / 10000.0f;
 int HEIGHT = 100;
 int WIDTH = 100;
@@ -43,6 +44,8 @@ std::vector<unsigned int> indices;
 
 float mouseX = 0.0f, mouseY = 0.0f;
 
+int frame_count;
+double mean_frame_rate;
 double frame_time = 0.0, total_time = 0.0, start_frame = 0.0, last_time = 0.0, last_time_sm = 0.0, current_time = 0.0;
 
 void init();
@@ -188,9 +191,12 @@ int main() {
         total_time = current_time - start_frame;
         last_time = current_time;
         std::cout << "Render time: " << frame_time * 1000 << "ms" << std::endl;
-        std::cout << "TOTAL FRAME time: " << total_time * 1000 << "ms" << std::endl;
+        std::cout << "TOTAL FRAME time: " << total_time * 1000 << "ms; FRAME RATE: " << 1.0 / total_time << std::endl;
+        frame_count ++;
+        mean_frame_rate += 1.0 / total_time;
     }
 
+    std::cout << "Mean FRAME RATE: " << mean_frame_rate / frame_count;
     glfwTerminate();
 
     return 0;
@@ -290,8 +296,11 @@ void setup() {
 				forces.push_back(fr);
 				con = new Constraint(ball_id, ball->id, FURTHER, glm::distance(new_ball->pos,ball->pos) * MAX_STRETCH);
 				constraints.push_back(con);
-				con = new Constraint(ball_id, ball->id, CLOSER, glm::distance(new_ball->pos,ball->pos) * MIN_STRETCH);
-				constraints.push_back(con);
+                if(ADD_CLOSER) {
+                    con = new Constraint(ball_id, ball->id, CLOSER,
+                                         glm::distance(new_ball->pos, ball->pos) * MIN_STRETCH);
+                    constraints.push_back(con);
+                }
             }
             if(j != 0) {
 				auto ball = balls[ball_id - 1];
@@ -299,8 +308,11 @@ void setup() {
 				forces.push_back(fr);
 				con = new Constraint(ball_id, ball->id, FURTHER, glm::distance(new_ball->pos,ball->pos) * MAX_STRETCH);
 				constraints.push_back(con);
-				con = new Constraint(ball_id, ball->id, CLOSER, glm::distance(new_ball->pos,ball->pos) * MIN_STRETCH);
-				constraints.push_back(con);
+                if(ADD_CLOSER) {
+                    con = new Constraint(ball_id, ball->id, CLOSER,
+                                         glm::distance(new_ball->pos, ball->pos) * MIN_STRETCH);
+                    constraints.push_back(con);
+                }
 			}
             if(i != 0 && j != 0) {
                 auto ball = balls[ball_id - 1 - WIDTH];
@@ -308,8 +320,11 @@ void setup() {
                 forces.push_back(fr);
                 con = new Constraint(ball_id, ball->id, FURTHER, glm::distance(new_ball->pos,ball->pos) * MAX_STRETCH);
                 constraints.push_back(con);
-                con = new Constraint(ball_id, ball->id, CLOSER, glm::distance(new_ball->pos,ball->pos) * MIN_STRETCH);
-                constraints.push_back(con);
+                if(ADD_CLOSER) {
+                    con = new Constraint(ball_id, ball->id, CLOSER,
+                                         glm::distance(new_ball->pos, ball->pos) * MIN_STRETCH);
+                    constraints.push_back(con);
+                }
             }
             if(i != 0 && j != WIDTH - 1) {
                 auto ball = balls[ball_id + 1 - WIDTH];
@@ -317,8 +332,11 @@ void setup() {
                 forces.push_back(fr);
                 con = new Constraint(ball_id, ball->id, FURTHER, glm::distance(new_ball->pos,ball->pos) * MAX_STRETCH);
                 constraints.push_back(con);
-                con = new Constraint(ball_id, ball->id, CLOSER, glm::distance(new_ball->pos,ball->pos) * MIN_STRETCH);
-                constraints.push_back(con);
+                if(ADD_CLOSER) {
+                    con = new Constraint(ball_id, ball->id, CLOSER,
+                                         glm::distance(new_ball->pos, ball->pos) * MIN_STRETCH);
+                    constraints.push_back(con);
+                }
             }
 
             if((i == 0  /*|| i == HEIGHT-1*/) && (j == 0 || j == WIDTH-1))

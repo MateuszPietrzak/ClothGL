@@ -15,14 +15,12 @@ glm::vec2 Constraint::displacement(glm::vec2 pos1, glm::vec2 pos2) {
     auto vector = glm::vec2(0.0f);
     float mag;
 
+    // with normalize 28-29 fps
+    // without length 38 fps
+    // without normalize 41 fps
+    // without both 46 fps
     switch(type) {
         case CLOSER:
-            vector = pos1 - pos2;
-            if(glm::length2(vector) > dist * dist)
-                return disp;
-            mag = (dist - glm::length(vector)) / 2.0f;
-            disp = glm::normalize(vector) * mag;
-        case CLOSER_MERGE:
             vector = pos1 - pos2;
             if(glm::length2(vector) > dist * dist)
                 return disp;

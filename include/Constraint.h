@@ -12,7 +12,6 @@
 
 enum ConstraintType {
     CLOSER,
-    CLOSER_MERGE,
     FURTHER
 };
 
