@@ -13,10 +13,10 @@
 class Ball {
 public:
     Ball(int _id, glm::vec2 _pos, glm::vec2 _vel, float _mass, float _step);
-    void update();
+    void update(float _step);
 
     glm::vec2 pos, prev_pos, force;
-    float mass, step, size;
+    float mass, size;
     int id;
     bool fixed, temp_fixed;
 };

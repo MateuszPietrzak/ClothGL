@@ -4,19 +4,18 @@
 
 #include "../../include/Ball.h"
 
-Ball::Ball(int _id, glm::vec2 _pos, glm::vec2 _vel, float _mass, float _step) :
+Ball::Ball(int _id, glm::vec2 _pos, glm::vec2 _vel, float _mass, float _step = 0) :
     id(_id),
     pos(_pos),
     mass(_mass),
-    step(_step),
     force(glm::vec2(0.0f)),
     size(pow(mass, 1.0f/3.0f) * 10.0f),
     fixed(false),
     temp_fixed(false) {
-    prev_pos = pos + (_vel * step);
+    prev_pos = pos + (_vel * _step);
 }
 
-void Ball::update() {
+void Ball::update(float _step) {
     if(fixed || temp_fixed) {
         force = glm::vec2(0.0f);
         return;
@@ -25,7 +24,7 @@ void Ball::update() {
     auto temp = pos;
     pos *= 2.0f;
     pos -= prev_pos;
-    pos += acceleration * step * step;
+    pos += acceleration * _step * _step;
     prev_pos = temp;
     force = glm::vec2(0.0f);
 }

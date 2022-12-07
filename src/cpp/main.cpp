@@ -17,7 +17,7 @@ GLFWwindow *window;
 int SCR_WIDTH = 1200;
 int SCR_HEIGHT = 800;
 
-float STEP_SIZE = 1.0f / 100.0f;
+double STEP_SIZE = 1.0f / 100.0f;
 float SIMPLE_GRAVITY_COEF = 500.0f;
 int JACOBIAN_COEF = 10;
 float SPRING_COEF = 1.5f;
@@ -25,13 +25,13 @@ float MAX_STRETCH = 1.2f;
 float MIN_STRETCH = 0.1f;
 float MASS = 3.0f;
 float EPS = 1.0f / 10000.0f;
-int HEIGHT = 60;
-int WIDTH = 60;
+int HEIGHT = 100;
+int WIDTH = 100;
 
 std::vector<Ball*> balls;
 std::vector<Constraint*> constraints;
 std::vector<Force*> forces;
-glm::vec2 pos_c1, pos_c2;
+glm::vec2 pos_c1;
 int ball_id;
 
 bool pressed;
@@ -43,7 +43,7 @@ std::vector<unsigned int> indices;
 
 float mouseX = 0.0f, mouseY = 0.0f;
 
-double frame_time = 0.0, last_time = 0.0, last_time_sm = 0.0, current_time = 0.0;
+double frame_time = 0.0, total_time = 0.0, start_frame = 0.0, last_time = 0.0, last_time_sm = 0.0, current_time = 0.0;
 
 void init();
 void setup();
@@ -86,7 +86,7 @@ int main() {
     unsigned int texture = Texture::createTexture("assets/image.png");
 
     while(!glfwWindowShouldClose(window)) {
-        last_time = glfwGetTime();
+        start_frame = last_time = glfwGetTime();
         // Something
         processInput(window);
 
@@ -125,8 +125,14 @@ int main() {
         last_time_sm = glfwGetTime();
 
         // update balls
+        if(total_time != 0) {
+            STEP_SIZE = total_time * 0.6;
+            STEP_SIZE = std::min(100.0 / (WIDTH * HEIGHT), STEP_SIZE);
+            std::cout << "Step: " << STEP_SIZE << std::endl;
+        }
+
         for(auto ball: balls)
-            ball->update();
+            ball->update(STEP_SIZE);
         current_time = glfwGetTime();
         frame_time = current_time - last_time_sm;
         std::cout << "Update balls time: " << frame_time * 1000 << "ms" << std::endl;
@@ -179,8 +185,10 @@ int main() {
         // End of render
         current_time = glfwGetTime();
         frame_time = current_time - last_time;
+        total_time = current_time - start_frame;
         last_time = current_time;
         std::cout << "Render time: " << frame_time * 1000 << "ms" << std::endl;
+        std::cout << "TOTAL FRAME time: " << total_time * 1000 << "ms" << std::endl;
     }
 
     glfwTerminate();
@@ -255,7 +263,6 @@ void processInput(GLFWwindow* window) {
 
 void setup() {
     pos_c1 = glm::vec2(-1.0f, 0.0f);
-    pos_c2 = glm::vec2(-1.0f, 0.0f);
     ball_id = 0;
 
     float ver_pad = SCR_HEIGHT / 4.0* 3.0;
@@ -367,8 +374,8 @@ void processForces() {
 }
 
 void processJacobian() {
-    double time_1 = 0.0, time_2 = 0.0, last_time_ss = 0.0;
-    last_time_ss = glfwGetTime();
+    // double time_1 = 0.0, time_2 = 0.0, last_time_ss = 0.0;
+    // last_time_ss = glfwGetTime();
     // all 1.06ms
     for(auto cons : constraints) {
         int id1 = cons->id_ball_1;
@@ -382,34 +389,32 @@ void processJacobian() {
 
         switch (cons->type) {
             case CLOSER:
-                if (glm::length(disp) > EPS) {
-                    if (ball1->fixed)
-                        ball2->pos -= disp * 2.0f;
-                    else if (ball2->fixed)
-                        ball1->pos += disp * 2.0f;
-                    else {
-                        ball1->pos += disp;
-                        ball2->pos -= disp;
-                    }
+                if (ball1->fixed)
+                    ball2->pos -= disp * 2.0f;
+                else if (ball2->fixed)
+                    ball1->pos += disp * 2.0f;
+                else {
+                    ball1->pos += disp;
+                    ball2->pos -= disp;
                 }
                 break;
             case FURTHER:
-                if (glm::length(disp) > EPS) {
-                    if (ball1->fixed)
-                        ball2->pos -= disp * 2.0f;
-                    else if (ball2->fixed)
-                        ball1->pos += disp * 2.0f;
-                    else {
-                        ball1->pos += disp;
-                        ball2->pos -= disp;
-                    }
+                if (ball1->fixed)
+                    ball2->pos -= disp * 2.0f;
+                else if (ball2->fixed)
+                    ball1->pos += disp * 2.0f;
+                else {
+                    ball1->pos += disp;
+                    ball2->pos -= disp;
                 }
                 break;
             default:
                 break;
         }
     }
+    /*
     current_time = glfwGetTime();
     time_2 = current_time - last_time_ss;
     std::cout << "Time 2: " << time_2 * 1000 << "ms" << std::endl;
+    */
 }
