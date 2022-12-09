@@ -249,6 +249,30 @@ src/cpp/Texture.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/ClothGL.dir/build.make CMakeFiles/ClothGL.dir/src/cpp/Texture.cpp.s
 .PHONY : src/cpp/Texture.cpp.s
 
+src/cpp/Vector3.o: src/cpp/Vector3.cpp.o
+.PHONY : src/cpp/Vector3.o
+
+# target to build an object file
+src/cpp/Vector3.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ClothGL.dir/build.make CMakeFiles/ClothGL.dir/src/cpp/Vector3.cpp.o
+.PHONY : src/cpp/Vector3.cpp.o
+
+src/cpp/Vector3.i: src/cpp/Vector3.cpp.i
+.PHONY : src/cpp/Vector3.i
+
+# target to preprocess a source file
+src/cpp/Vector3.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ClothGL.dir/build.make CMakeFiles/ClothGL.dir/src/cpp/Vector3.cpp.i
+.PHONY : src/cpp/Vector3.cpp.i
+
+src/cpp/Vector3.s: src/cpp/Vector3.cpp.s
+.PHONY : src/cpp/Vector3.s
+
+# target to generate assembly for a file
+src/cpp/Vector3.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ClothGL.dir/build.make CMakeFiles/ClothGL.dir/src/cpp/Vector3.cpp.s
+.PHONY : src/cpp/Vector3.cpp.s
+
 src/cpp/glad.o: src/cpp/glad.c.o
 .PHONY : src/cpp/glad.o
 
@@ -321,6 +345,9 @@ help:
 	@echo "... src/cpp/Texture.o"
 	@echo "... src/cpp/Texture.i"
 	@echo "... src/cpp/Texture.s"
+	@echo "... src/cpp/Vector3.o"
+	@echo "... src/cpp/Vector3.i"
+	@echo "... src/cpp/Vector3.s"
 	@echo "... src/cpp/glad.o"
 	@echo "... src/cpp/glad.i"
 	@echo "... src/cpp/glad.s"

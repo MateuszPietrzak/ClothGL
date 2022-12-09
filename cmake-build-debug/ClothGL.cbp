@@ -101,6 +101,9 @@
 		<Unit filename="/home/drabart/CLionProjects/ClothGL/include/Texture.h">
 			<Option target="ClothGL"/>
 		</Unit>
+		<Unit filename="/home/drabart/CLionProjects/ClothGL/include/Vector3.h">
+			<Option target="ClothGL"/>
+		</Unit>
 		<Unit filename="/home/drabart/CLionProjects/ClothGL/include/stb_image.h">
 			<Option target="ClothGL"/>
 		</Unit>
@@ -117,6 +120,9 @@
 			<Option target="ClothGL"/>
 		</Unit>
 		<Unit filename="/home/drabart/CLionProjects/ClothGL/src/cpp/Texture.cpp">
+			<Option target="ClothGL"/>
+		</Unit>
+		<Unit filename="/home/drabart/CLionProjects/ClothGL/src/cpp/Vector3.cpp">
 			<Option target="ClothGL"/>
 		</Unit>
 		<Unit filename="/home/drabart/CLionProjects/ClothGL/src/cpp/glad.c">
