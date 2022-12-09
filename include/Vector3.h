@@ -7,6 +7,8 @@
 
 class Vector3 {
 public:
+    Vector3();
+    Vector3(float _x, float _y);
     Vector3(float _x, float _y, float _z);
 
     Vector3 operator+(const Vector3& other) const;
@@ -20,7 +22,7 @@ public:
 
     float length();
     float length2();
-    float normalize();
+    void normalize();
     float dist(const Vector3& other);
     float dot_product(const Vector3& other);
 

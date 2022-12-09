@@ -4,6 +4,20 @@
 
 #include "../../include/Vector3.h"
 
+Vector3::Vector3() :
+    x(0.0),
+    y(0.0),
+    z(0.0){
+
+}
+
+Vector3::Vector3(float _x, float _y) :
+        x(_x),
+        y(_y),
+        z(0.0){
+
+}
+
 Vector3::Vector3(float _x, float _y, float _z) :
     x(_x),
     y(_y),
@@ -19,6 +33,7 @@ Vector3 Vector3::operator+=(const Vector3 &other) {
     this->x += other.x;
     this->y += other.y;
     this->z += other.z;
+    return *this;
 }
 
 Vector3 Vector3::operator-(const Vector3 &other) const {
@@ -29,6 +44,7 @@ Vector3 Vector3::operator-=(const Vector3 &other) {
     this->x -= other.x;
     this->y -= other.y;
     this->z -= other.z;
+    return *this;
 }
 
 Vector3 Vector3::operator*(const float &other) const {
@@ -39,6 +55,7 @@ Vector3 Vector3::operator*=(const float &other) {
     this->x *= other;
     this->y *= other;
     this->z *= other;
+    return *this;
 }
 
 Vector3 Vector3::operator/(const float &other) const {
@@ -49,6 +66,7 @@ Vector3 Vector3::operator/=(const float &other) {
     this->x /= other;
     this->y /= other;
     this->z /= other;
+    return *this;
 }
 
 inline float sqrt(float x)
@@ -70,7 +88,7 @@ float Vector3::length() {
     return sqrt(this->length2());
 }
 
-float Vector3::normalize() {
+void Vector3::normalize() {
     float len = this->length();
     this->x /= len;
     this->y /= len;
