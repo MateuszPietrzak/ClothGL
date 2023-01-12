@@ -17,21 +17,22 @@ GLFWwindow *window;
 int SCR_WIDTH = 1200;
 int SCR_HEIGHT = 800;
 
-float STEP_SIZE = 1.0f / 100.0f;
+double STEP_SIZE = 1.0f / 100.0f;
 float SIMPLE_GRAVITY_COEF = 500.0f;
-int JACOBIAN_COEF = 8;
+int JACOBIAN_COEF = 10;
 float SPRING_COEF = 1.5f;
 float MAX_STRETCH = 1.2f;
 float MIN_STRETCH = 0.1f;
 float MASS = 3.0f;
+bool ADD_CLOSER = false;
 float EPS = 1.0f / 10000.0f;
-int HEIGHT = 20;
-int WIDTH = 20;
+int HEIGHT = 100;
+int WIDTH = 100;
 
 std::vector<Ball*> balls;
 std::vector<Constraint*> constraints;
 std::vector<Force*> forces;
-glm::vec2 pos_c1, pos_c2;
+Vector3 pos_c1;
 int ball_id;
 
 bool pressed;
@@ -43,7 +44,9 @@ std::vector<unsigned int> indices;
 
 float mouseX = 0.0f, mouseY = 0.0f;
 
-double frame_time = 0.0, last_time = 0.0, last_time_sm = 0.0, current_time = 0.0;
+int frame_count;
+double mean_frame_rate;
+double frame_time = 0.0, total_time = 0.0, start_frame = 0.0, last_time = 0.0, last_time_sm = 0.0, current_time = 0.0;
 
 void init();
 void setup();
@@ -86,7 +89,7 @@ int main() {
     unsigned int texture = Texture::createTexture("assets/image.png");
 
     while(!glfwWindowShouldClose(window)) {
-        last_time = glfwGetTime();
+        start_frame = last_time = glfwGetTime();
         // Something
         processInput(window);
 
@@ -103,7 +106,7 @@ int main() {
         last_time_sm = glfwGetTime();
         // Move held ball
         if(carrying_ball)
-            pressed_ball->pos = glm::vec2(mouseX, mouseY);
+            pressed_ball->pos = Vector3(mouseX, mouseY, 0.0f);
         current_time = glfwGetTime();
         frame_time = current_time - last_time_sm;
         std::cout << "Move 1 time: " << frame_time * 1000 << "ms" << std::endl;
@@ -125,8 +128,14 @@ int main() {
         last_time_sm = glfwGetTime();
 
         // update balls
+        if(total_time != 0) {
+            STEP_SIZE = total_time * 0.6;
+            STEP_SIZE = std::min(100.0 / (WIDTH * HEIGHT), STEP_SIZE);
+            std::cout << "Step: " << STEP_SIZE << std::endl;
+        }
+
         for(auto ball: balls)
-            ball->update();
+            ball->update(STEP_SIZE);
         current_time = glfwGetTime();
         frame_time = current_time - last_time_sm;
         std::cout << "Update balls time: " << frame_time * 1000 << "ms" << std::endl;
@@ -179,10 +188,15 @@ int main() {
         // End of render
         current_time = glfwGetTime();
         frame_time = current_time - last_time;
+        total_time = current_time - start_frame;
         last_time = current_time;
         std::cout << "Render time: " << frame_time * 1000 << "ms" << std::endl;
+        std::cout << "TOTAL FRAME time: " << total_time * 1000 << "ms; FRAME RATE: " << 1.0 / total_time << std::endl;
+        frame_count ++;
+        mean_frame_rate += 1.0 / total_time;
     }
 
+    std::cout << "Mean FRAME RATE: " << mean_frame_rate / frame_count;
     glfwTerminate();
 
     return 0;
@@ -221,10 +235,10 @@ void framebufferSizeCallback(GLFWwindow* window, int width, int height) {
 
 void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
     if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
-        pos_c1 = glm::vec2(mouseX, mouseY);
+        pos_c1 = Vector3(mouseX, mouseY);
         pressed = true;
         for(auto ball : balls) {
-            if(glm::distance(ball->pos, pos_c1) < ball->size / 2.0f) {
+            if(ball->pos.dist(pos_c1) < ball->size / 2.0f) {
                 ball->temp_fixed = true;
                 pressed_ball = ball;
                 carrying_ball = true;
@@ -254,15 +268,14 @@ void processInput(GLFWwindow* window) {
 }
 
 void setup() {
-    pos_c1 = glm::vec2(-1.0f, 0.0f);
-    pos_c2 = glm::vec2(-1.0f, 0.0f);
+    pos_c1 = Vector3(-1.0f, 0.0f);
     ball_id = 0;
 
     float ver_pad = SCR_HEIGHT / 4.0* 3.0;
 	float hor_pad = SCR_WIDTH / 4.0 * 3.0;
 	float ver_dist = (SCR_HEIGHT - 2.0 * ver_pad) / (HEIGHT - 1);
 	float hor_dist = (SCR_WIDTH - 2.0 * hor_pad) / (WIDTH - 1);
-    auto pos = glm::vec2(0.0f);
+    auto pos = Vector3();
 
     balls.resize(HEIGHT*WIDTH);
 
@@ -271,7 +284,7 @@ void setup() {
 
             pos.x = hor_pad + hor_dist * j;
             pos.y = SCR_HEIGHT - ver_pad - ver_dist * i;
-            auto new_ball = new Ball(ball_id, pos, glm::vec2(0.0f), MASS, STEP_SIZE);
+            auto new_ball = new Ball(ball_id, pos, Vector3(), MASS, STEP_SIZE);
 
             auto fr = new Force(ball_id, SIMPLE_GRAVITY, -SIMPLE_GRAVITY_COEF);
             forces.push_back(fr);
@@ -279,44 +292,56 @@ void setup() {
 
             if(i != 0) {
                 auto ball = balls[ball_id - WIDTH];
-                fr = new Force(ball_id, ball->id, SPRING, SPRING_COEF, glm::distance(new_ball->pos,ball->pos));
+                fr = new Force(ball_id, ball->id, SPRING, SPRING_COEF, new_ball->pos.dist(ball->pos));
+
 				forces.push_back(fr);
-				con = new Constraint(ball_id, ball->id, FURTHER, glm::distance(new_ball->pos,ball->pos) * MAX_STRETCH);
+				con = new Constraint(ball_id, ball->id, FURTHER, new_ball->pos.dist(ball->pos) * MAX_STRETCH);
 				constraints.push_back(con);
-				con = new Constraint(ball_id, ball->id, CLOSER, glm::distance(new_ball->pos,ball->pos) * MIN_STRETCH);
-				constraints.push_back(con);
+                if(ADD_CLOSER) {
+                    con = new Constraint(ball_id, ball->id, CLOSER,
+                                         new_ball->pos.dist(ball->pos) * MIN_STRETCH);
+                    constraints.push_back(con);
+                }
             }
             if(j != 0) {
 				auto ball = balls[ball_id - 1];
-				fr = new Force(ball_id, ball->id, SPRING, SPRING_COEF, glm::distance(new_ball->pos,ball->pos));
+				fr = new Force(ball_id, ball->id, SPRING, SPRING_COEF, new_ball->pos.dist(ball->pos));
 				forces.push_back(fr);
-				con = new Constraint(ball_id, ball->id, FURTHER, glm::distance(new_ball->pos,ball->pos) * MAX_STRETCH);
+				con = new Constraint(ball_id, ball->id, FURTHER, new_ball->pos.dist(ball->pos) * MAX_STRETCH);
 				constraints.push_back(con);
-				con = new Constraint(ball_id, ball->id, CLOSER, glm::distance(new_ball->pos,ball->pos) * MIN_STRETCH);
-				constraints.push_back(con);
+                if(ADD_CLOSER) {
+                    con = new Constraint(ball_id, ball->id, CLOSER,
+                                         new_ball->pos.dist( ball->pos) * MIN_STRETCH);
+                    constraints.push_back(con);
+                }
 			}
             if(i != 0 && j != 0) {
                 auto ball = balls[ball_id - 1 - WIDTH];
-                fr = new Force(ball_id, ball->id, SPRING, SPRING_COEF, glm::distance(new_ball->pos,ball->pos));
+                fr = new Force(ball_id, ball->id, SPRING, SPRING_COEF, new_ball->pos.dist(ball->pos));
                 forces.push_back(fr);
-                con = new Constraint(ball_id, ball->id, FURTHER, glm::distance(new_ball->pos,ball->pos) * MAX_STRETCH);
+                con = new Constraint(ball_id, ball->id, FURTHER, new_ball->pos.dist(ball->pos) * MAX_STRETCH);
                 constraints.push_back(con);
-                con = new Constraint(ball_id, ball->id, CLOSER, glm::distance(new_ball->pos,ball->pos) * MIN_STRETCH);
-                constraints.push_back(con);
+                if(ADD_CLOSER) {
+                    con = new Constraint(ball_id, ball->id, CLOSER,
+                                         new_ball->pos.dist( ball->pos) * MIN_STRETCH);
+                    constraints.push_back(con);
+                }
             }
             if(i != 0 && j != WIDTH - 1) {
                 auto ball = balls[ball_id + 1 - WIDTH];
-                fr = new Force(ball_id, ball->id, SPRING, SPRING_COEF, glm::distance(new_ball->pos,ball->pos));
+                fr = new Force(ball_id, ball->id, SPRING, SPRING_COEF, new_ball->pos.dist(ball->pos));
                 forces.push_back(fr);
-                con = new Constraint(ball_id, ball->id, FURTHER, glm::distance(new_ball->pos,ball->pos) * MAX_STRETCH);
+                con = new Constraint(ball_id, ball->id, FURTHER, new_ball->pos.dist(ball->pos) * MAX_STRETCH);
                 constraints.push_back(con);
-                con = new Constraint(ball_id, ball->id, CLOSER, glm::distance(new_ball->pos,ball->pos) * MIN_STRETCH);
-                constraints.push_back(con);
+                if(ADD_CLOSER) {
+                    con = new Constraint(ball_id, ball->id, CLOSER,
+                                         new_ball->pos.dist( ball->pos) * MIN_STRETCH);
+                    constraints.push_back(con);
+                }
             }
 
             if((i == 0  /*|| i == HEIGHT-1*/) && (j == 0 || j == WIDTH-1))
 				new_ball->fixed = true;
-
             balls[ball_id] = new_ball;
             vertices.push_back(new_ball->pos.x);
             vertices.push_back(new_ball->pos.y);
@@ -367,8 +392,8 @@ void processForces() {
 }
 
 void processJacobian() {
-    double time_1 = 0.0, time_2 = 0.0, last_time_ss = 0.0;
-    last_time_ss = glfwGetTime();
+    // double time_1 = 0.0, time_2 = 0.0, last_time_ss = 0.0;
+    // last_time_ss = glfwGetTime();
     // all 1.06ms
     for(auto cons : constraints) {
         int id1 = cons->id_ball_1;
@@ -382,34 +407,32 @@ void processJacobian() {
 
         switch (cons->type) {
             case CLOSER:
-                if (glm::length(disp) > EPS) {
-                    if (ball1->fixed)
-                        ball2->pos -= disp * 2.0f;
-                    else if (ball2->fixed)
-                        ball1->pos += disp * 2.0f;
-                    else {
-                        ball1->pos += disp;
-                        ball2->pos -= disp;
-                    }
+                if (ball1->fixed)
+                    ball2->pos -= disp * 2.0f;
+                else if (ball2->fixed)
+                    ball1->pos += disp * 2.0f;
+                else {
+                    ball1->pos += disp;
+                    ball2->pos -= disp;
                 }
                 break;
             case FURTHER:
-                if (glm::length(disp) > EPS) {
-                    if (ball1->fixed)
-                        ball2->pos -= disp * 2.0f;
-                    else if (ball2->fixed)
-                        ball1->pos += disp * 2.0f;
-                    else {
-                        ball1->pos += disp;
-                        ball2->pos -= disp;
-                    }
+                if (ball1->fixed)
+                    ball2->pos -= disp * 2.0f;
+                else if (ball2->fixed)
+                    ball1->pos += disp * 2.0f;
+                else {
+                    ball1->pos += disp;
+                    ball2->pos -= disp;
                 }
                 break;
             default:
                 break;
         }
     }
+    /*
     current_time = glfwGetTime();
     time_2 = current_time - last_time_ss;
     std::cout << "Time 2: " << time_2 * 1000 << "ms" << std::endl;
+    */
 }

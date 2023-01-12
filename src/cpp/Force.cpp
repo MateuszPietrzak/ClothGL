@@ -25,24 +25,24 @@ Force::Force(int _id_ball_1, int _id_ball_2, ForceType _type, float _coeff, floa
     coeff(_coeff),
     start_len(_start_len) {}
 
-glm::vec2 Force::force(glm::vec2 pos1, glm::vec2 pos2, float mass1, float mass2) {
-    auto force = glm::vec2(0.0f);
-    auto vector = glm::vec2(0.0f);
+Vector3 Force::force(Vector3 pos1, Vector3 pos2, float mass1, float mass2) {
+    auto force = Vector3();
+    Vector3 vector;
     float mag_sq;
 
     switch(type){
         case GRAVITY:
             vector = pos1 - pos2;
-            mag_sq = glm::length2(vector);
-            vector = glm::normalize(vector);
+            mag_sq = vector.length2();
+            vector.normalize();
             force = vector * (-coeff * mass1 * mass2 / mag_sq);
             break;
         case SPRING:
             vector = pos1 - pos2;
-            force = vector * (-coeff * (glm::length(vector) - start_len));
+            force = vector * (-coeff * (vector.length() - start_len));
             break;
         case SIMPLE_GRAVITY:
-            force = glm::vec2(0.0f, -coeff * mass1);
+            force = Vector3(0.0f, -coeff * mass1);
             break;
     }
 

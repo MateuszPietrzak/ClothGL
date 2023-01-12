@@ -10,30 +10,30 @@ Constraint::Constraint(int _id_ball_1, int _id_ball_2, ConstraintType _type, flo
     type(_type),
     dist(_dist) {}
 
-glm::vec2 Constraint::displacement(glm::vec2 pos1, glm::vec2 pos2) {
-    auto disp = glm::vec2(0.0f);
-    auto vector = glm::vec2(0.0f);
+Vector3 Constraint::displacement(Vector3 pos1, Vector3 pos2) {
+    auto disp = Vector3();
+    auto vector = Vector3();
     float mag;
 
+    // with normalize 28-29 fps
+    // without length 38 fps
+    // without normalize 41 fps
+    // without both 46 fps
     switch(type) {
         case CLOSER:
             vector = pos1 - pos2;
-            if(glm::length2(vector) > dist * dist)
+            if(vector.length2() > dist * dist)
                 return disp;
-            mag = (dist - glm::length(vector)) / 2.0f;
-            disp = glm::normalize(vector) * mag;
-        case CLOSER_MERGE:
-            vector = pos1 - pos2;
-            if(glm::length2(vector) > dist * dist)
-                return disp;
-            mag = (dist - glm::length(vector)) / 2.0f;
-            disp = glm::normalize(vector) * mag;
+            mag = (dist - vector.length()) / 2.0f;
+            vector.normalize();
+            disp = vector * mag;
         case FURTHER:
             vector = pos1 - pos2;
-            if(glm::length2(vector) < dist * dist)
+            if(vector.length2() < dist * dist)
                 return disp;
-            mag = (dist - glm::length(vector)) / 2.0f;
-            disp = glm::normalize(vector) * mag;
+            mag = (dist - vector.length()) / 2.0f;
+            vector.normalize();
+            disp = vector * mag;
     }
 
     return disp;

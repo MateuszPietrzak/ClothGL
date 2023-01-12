@@ -9,6 +9,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/norm.hpp>
+#include "Vector3.h"
 
 enum ForceType {
     GRAVITY,
@@ -22,7 +23,7 @@ public:
     Force(int _id_ball_1, int _id_ball_2, ForceType _type, float _coeff);
     Force(int _id_ball_1, int _id_ball_2, ForceType _type, float _coeff, float _start_len);
 
-    glm::vec2 force(glm::vec2 pos1, glm::vec2 pos2, float mass1, float mass2);
+    Vector3 force(Vector3 pos1, Vector3 pos2, float mass1, float mass2);
 
     int id_ball_1, id_ball_2;
     ForceType type;
