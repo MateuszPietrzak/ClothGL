@@ -5,6 +5,7 @@
 
 #include <iostream>
 #include <vector>
+#include <map>
 #include "../../include/Shader.h"
 #include "../../include/Ball.h"
 #include "../../include/Constraint.h"
@@ -17,14 +18,14 @@ int SCR_WIDTH = 1200;
 int SCR_HEIGHT = 800;
 
 double STEP_SIZE = 1.0f / 100.0f;
-float SIMPLE_GRAVITY_COEF = 1000.0f;
+float SIMPLE_GRAVITY_COEF = 500.0f;
 int JACOBIAN_COEF = 10;
-float SPRING_COEF = 2.0f;
+float SPRING_COEF = 1.5f;
 float MAX_STRETCH = 1.2f;
 float MIN_STRETCH = 0.1f;
 float MASS = 3.0f;
-bool ADD_CLOSER = true;
-// float EPS = 1.0f / 10000.0f;
+bool ADD_CLOSER = false;
+float EPS = 1.0f / 10000.0f;
 int HEIGHT = 100;
 int WIDTH = 100;
 
@@ -95,14 +96,21 @@ int main() {
         glClearColor(0.20f, 0.19f, 0.18f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
         // End of something
+        current_time = glfwGetTime();
+        frame_time = current_time - last_time;
+        std::cout << "Something time: " << frame_time * 1000 << "ms" << std::endl;
+        last_time = glfwGetTime();
 
         // -----------------------------------------------------------------------------------------------------------
         // Physics
         last_time_sm = glfwGetTime();
-
         // Move held ball
         if(carrying_ball)
-            pressed_ball->pos = Vector3(mouseX, mouseY);
+            pressed_ball->pos = Vector3(mouseX, mouseY, 0.0f);
+        current_time = glfwGetTime();
+        frame_time = current_time - last_time_sm;
+        std::cout << "Move 1 time: " << frame_time * 1000 << "ms" << std::endl;
+        last_time_sm = glfwGetTime();
 
         // process forces
         processForces();
@@ -183,7 +191,7 @@ int main() {
         total_time = current_time - start_frame;
         last_time = current_time;
         std::cout << "Render time: " << frame_time * 1000 << "ms" << std::endl;
-        std::cout << "TOTAL FRAME time: " << total_time * 1000 << "ms; FRAME RATE: " << 1.0 / total_time << "\n\n";
+        std::cout << "TOTAL FRAME time: " << total_time * 1000 << "ms; FRAME RATE: " << 1.0 / total_time << std::endl;
         frame_count ++;
         mean_frame_rate += 1.0 / total_time;
     }
@@ -285,6 +293,7 @@ void setup() {
             if(i != 0) {
                 auto ball = balls[ball_id - WIDTH];
                 fr = new Force(ball_id, ball->id, SPRING, SPRING_COEF, new_ball->pos.dist(ball->pos));
+
 				forces.push_back(fr);
 				con = new Constraint(ball_id, ball->id, FURTHER, new_ball->pos.dist(ball->pos) * MAX_STRETCH);
 				constraints.push_back(con);
@@ -302,7 +311,7 @@ void setup() {
 				constraints.push_back(con);
                 if(ADD_CLOSER) {
                     con = new Constraint(ball_id, ball->id, CLOSER,
-                                         new_ball->pos.dist(ball->pos) * MIN_STRETCH);
+                                         new_ball->pos.dist( ball->pos) * MIN_STRETCH);
                     constraints.push_back(con);
                 }
 			}
@@ -314,7 +323,7 @@ void setup() {
                 constraints.push_back(con);
                 if(ADD_CLOSER) {
                     con = new Constraint(ball_id, ball->id, CLOSER,
-                                         new_ball->pos.dist(ball->pos) * MIN_STRETCH);
+                                         new_ball->pos.dist( ball->pos) * MIN_STRETCH);
                     constraints.push_back(con);
                 }
             }
@@ -326,14 +335,13 @@ void setup() {
                 constraints.push_back(con);
                 if(ADD_CLOSER) {
                     con = new Constraint(ball_id, ball->id, CLOSER,
-                                         new_ball->pos.dist(ball->pos) * MIN_STRETCH);
+                                         new_ball->pos.dist( ball->pos) * MIN_STRETCH);
                     constraints.push_back(con);
                 }
             }
 
             if((i == 0  /*|| i == HEIGHT-1*/) && (j == 0 || j == WIDTH-1))
 				new_ball->fixed = true;
-
             balls[ball_id] = new_ball;
             vertices.push_back(new_ball->pos.x);
             vertices.push_back(new_ball->pos.y);
