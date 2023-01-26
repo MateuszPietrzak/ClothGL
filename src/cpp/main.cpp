@@ -2,6 +2,7 @@
 #include <GLFW/glfw3.h>
 
 #define STB_IMAGE_IMPLEMENTATION
+#define WIREFRAME
 
 #include <iostream>
 #include <vector>
@@ -225,6 +226,10 @@ void init() {
     glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
     glfwSetMouseButtonCallback(window, mouseButtonCallback);
     glfwSetCursorPosCallback(window, cursorPositionCallback);
+
+#ifdef WIREFRAME
+    glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+#endif
 }
 
 void framebufferSizeCallback(GLFWwindow* window, int width, int height) {
